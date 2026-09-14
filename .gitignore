@@ -25,3 +25,5 @@ dist-ssr
 
 # Scratch photos used while checking the looks by eye
 public/__test/
+.vercel
+.env*
