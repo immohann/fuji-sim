@@ -1,13 +1,24 @@
 /** Long edge used for the interactive preview. Keeps slider drags at 60fps. */
 const PREVIEW_MAX_EDGE = 2560
 
+/** Long edge of the tray thumbnail. */
+const THUMB_MAX_EDGE = 180
+
 export interface LoadedImage {
-  /** Full resolution, used only for export. */
-  full: ImageBitmap
-  /** Downscaled for interactive rendering. May be the same object as `full`. */
+  /**
+   * The original file. The full-resolution bitmap is decoded from this on
+   * demand at export time rather than kept resident: a single 12MP photo costs
+   * roughly 48MB as an ImageBitmap, so holding several open at once is how you
+   * run a tab out of memory.
+   */
+  file: File
+  /** Downscaled for interactive rendering. */
   preview: ImageBitmap
   /** The preview drawn to a 2D canvas -- the "before" layer of the comparison. */
   previewCanvas: HTMLCanvasElement
+  /** Small JPEG data URL for the photo tray. */
+  thumbUrl: string
+  /** Dimensions the export will be produced at. */
   fullWidth: number
   fullHeight: number
   previewWidth: number
@@ -35,13 +46,18 @@ function fit(width: number, height: number, maxEdge: number): [number, number] {
   return [Math.max(1, Math.round(width * scale)), Math.max(1, Math.round(height * scale))]
 }
 
-function toCanvas(bitmap: ImageBitmap, width: number, height: number): HTMLCanvasElement {
+function toCanvas(
+  source: ImageBitmap | HTMLCanvasElement,
+  width: number,
+  height: number,
+): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
   canvas.width = width
   canvas.height = height
   const ctx = canvas.getContext('2d')
   if (!ctx) throw new ImageLoadError('Could not get a 2D canvas context')
-  ctx.drawImage(bitmap, 0, 0, width, height)
+  ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(source, 0, 0, width, height)
   // Styled here rather than by the component that mounts it: this canvas is
   // handed around as data, and a consumer should not have to mutate it.
   canvas.className = 'block h-full w-full'
@@ -49,7 +65,8 @@ function toCanvas(bitmap: ImageBitmap, width: number, height: number): HTMLCanva
 }
 
 /**
- * Decodes a user-selected file into full-resolution and preview bitmaps.
+ * Decodes a user-selected file into a preview bitmap plus the measurements the
+ * rest of the app needs.
  *
  * `imageOrientation: 'from-image'` is the important flag: without it, photos
  * straight off a phone arrive rotated, because the pixels are landscape and only
@@ -72,53 +89,76 @@ export async function loadImage(file: File, maxTextureSize: number): Promise<Loa
     // plainly, because iPhone photos are HEIC by default.
     if (HEIC_PATTERN.test(file.name) || /heic|heif/i.test(file.type)) {
       throw new ImageLoadError(
-        'This browser can’t read HEIC files. Export the photo as JPEG and try again.',
+        `${file.name}: this browser can’t read HEIC files. Export it as JPEG and try again.`,
       )
     }
-    throw new ImageLoadError('That doesn’t look like an image this browser can read.')
+    throw new ImageLoadError(`${file.name}: not an image this browser can read.`)
   }
 
-  // Clamp the "full" resolution to what the GPU can actually hold.
-  const exportCap = Math.min(maxTextureSize, 8192)
-  let fullBitmap = full
-  let [fullWidth, fullHeight] = fit(full.width, full.height, exportCap)
-  if (fullWidth !== full.width || fullHeight !== full.height) {
-    fullBitmap = await createImageBitmap(full, {
-      resizeWidth: fullWidth,
-      resizeHeight: fullHeight,
+  try {
+    // Clamp the export resolution to what the GPU can actually hold.
+    const exportCap = Math.min(maxTextureSize, 8192)
+    const [fullWidth, fullHeight] = fit(full.width, full.height, exportCap)
+    const [previewWidth, previewHeight] = fit(
+      fullWidth,
+      fullHeight,
+      Math.min(PREVIEW_MAX_EDGE, exportCap),
+    )
+
+    const preview = await createImageBitmap(full, {
+      resizeWidth: previewWidth,
+      resizeHeight: previewHeight,
       resizeQuality: 'high',
     })
+
+    const previewCanvas = toCanvas(preview, previewWidth, previewHeight)
+    const [thumbWidth, thumbHeight] = fit(previewWidth, previewHeight, THUMB_MAX_EDGE)
+    const thumbUrl = toCanvas(previewCanvas, thumbWidth, thumbHeight).toDataURL(
+      'image/jpeg',
+      0.72,
+    )
+
+    return {
+      file,
+      preview,
+      previewCanvas,
+      thumbUrl,
+      fullWidth,
+      fullHeight,
+      previewWidth,
+      previewHeight,
+      baseName: baseNameOf(file.name),
+    }
+  } finally {
+    // The full-resolution bitmap has done its job; export re-decodes the file.
     full.close()
   }
+}
 
-  const [previewWidth, previewHeight] = fit(
-    fullWidth,
-    fullHeight,
-    Math.min(PREVIEW_MAX_EDGE, exportCap),
-  )
+/** Re-decodes the original file at export resolution. */
+export async function decodeForExport(
+  image: LoadedImage,
+  maxTextureSize: number,
+): Promise<ImageBitmap> {
+  const full = await createImageBitmap(image.file, { imageOrientation: 'from-image' })
+  const cap = Math.min(maxTextureSize, 8192)
+  const [width, height] = fit(full.width, full.height, cap)
+  if (width === full.width && height === full.height) return full
 
-  const preview =
-    previewWidth === fullWidth && previewHeight === fullHeight
-      ? fullBitmap
-      : await createImageBitmap(fullBitmap, {
-          resizeWidth: previewWidth,
-          resizeHeight: previewHeight,
-          resizeQuality: 'high',
-        })
-
-  return {
-    full: fullBitmap,
-    preview,
-    previewCanvas: toCanvas(preview, previewWidth, previewHeight),
-    fullWidth,
-    fullHeight,
-    previewWidth,
-    previewHeight,
-    baseName: baseNameOf(file.name),
+  try {
+    return await createImageBitmap(full, {
+      resizeWidth: width,
+      resizeHeight: height,
+      resizeQuality: 'high',
+    })
+  } finally {
+    full.close()
   }
 }
 
 export function releaseImage(image: LoadedImage): void {
-  if (image.preview !== image.full) image.preview.close()
-  image.full.close()
+  image.preview.close()
+  // Drop the backing store rather than waiting for GC to notice the canvas.
+  image.previewCanvas.width = 0
+  image.previewCanvas.height = 0
 }

@@ -21,7 +21,7 @@ by calling a font CDN.
 
 ## Using it
 
-1. Drop a photo in — or click, or paste from the clipboard.
+1. Drop photos in — or click, or paste from the clipboard. Several at once is fine.
 2. Pick a film. The five thumbnails are rendered from *your* photo, so you are choosing a
    look rather than reading a label.
 3. Set intensity and grain. Exposure, contrast, grain size and vignette live under
@@ -29,8 +29,14 @@ by calling a font CDN.
 4. Hit **Compare** to drag a before/after divider, or hold <kbd>B</kbd> for the original.
 5. Download a full-resolution JPEG.
 
-Keyboard: <kbd>1</kbd>–<kbd>5</kbd> switch film, <kbd>C</kbd> toggles compare,
-<kbd>B</kbd> (held) shows the original.
+Up to 12 photos can be loaded at once. Each keeps **its own film and its own settings** —
+switching between them should feel like picking up a different print, not like carrying one
+set of sliders around. The tray tiles render each photo under its own film, so you can see
+at a glance what you've already done to each. **Start over** in the header clears the tray
+and returns to the landing; it asks first, because re-picking files is real work.
+
+Keyboard: <kbd>1</kbd>–<kbd>5</kbd> switch film, <kbd>[</kbd> <kbd>]</kbd> step between
+photos, <kbd>C</kbd> toggles compare, <kbd>B</kbd> (held) shows the original.
 
 ## How the looks are built
 
@@ -64,6 +70,9 @@ Two details worth knowing, because both are easy to get wrong:
 - **Grain is sized against the frame, not the pixel grid.** Sizing grain in raw pixels would
   make a 6000px export finer-grained *relative to the photo* than the 2560px preview it was
   judged on. Grain belongs to the negative, not to the resolution you scanned it at.
+- **Full-resolution bitmaps are not kept resident.** A loaded photo holds only its preview
+  and the original `File`; export re-decodes from that file on demand. A 12MP photo costs
+  roughly 48MB as an `ImageBitmap`, so holding a dozen open is how you kill a tab.
 
 ## Running it
 
@@ -89,6 +98,9 @@ against the GPU in the browser, since the grading only exists as a shader.
 - **HEIC** decodes in Safari but not Chrome or Firefox — iPhone photos may need exporting
   as JPEG first. The app detects this and says which.
 - Very large photos are downscaled to the GPU's maximum texture size before export.
+- **12 photos at a time.** The cap is memory, not stubbornness: each loaded photo keeps a
+  preview bitmap of up to 2560px on the long edge.
+- Downloads are one at a time. There is no zip-everything button.
 
 ## Credits
 

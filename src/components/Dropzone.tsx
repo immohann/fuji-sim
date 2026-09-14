@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface DropzoneProps {
-  onFile: (file: File) => void
+  onFiles: (files: File[]) => void
   /** Copy shown on the drag-over scrim. */
   overlayLabel: string
   /** Receives a callback that opens the native file picker. */
@@ -14,32 +14,38 @@ interface DropzoneProps {
  * Paste matters more than it looks: it's the fastest path from a screenshot or
  * a web image to a result, and costs one event listener.
  */
-export function Dropzone({ onFile, overlayLabel, children }: DropzoneProps) {
+export function Dropzone({ onFiles, overlayLabel, children }: DropzoneProps) {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [over, setOver] = useState(false)
   const depth = useRef(0)
 
   const take = useCallback(
     (files: FileList | null | undefined) => {
-      const file = files?.[0]
-      if (file) onFile(file)
+      // Non-images are filtered here rather than rejected one by one later:
+      // dropping a folder of mixed files should just pick up the photos.
+      const picked = Array.from(files ?? []).filter(
+        (f) =>
+          f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|avif|heic|heif)$/i.test(f.name),
+      )
+      if (picked.length > 0) onFiles(picked)
     },
-    [onFile],
+    [onFiles],
   )
 
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
-      const file = Array.from(e.clipboardData?.items ?? [])
-        .find((item) => item.kind === 'file' && item.type.startsWith('image/'))
-        ?.getAsFile()
-      if (file) {
+      const files = Array.from(e.clipboardData?.items ?? [])
+        .filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+        .map((item) => item.getAsFile())
+        .filter((f): f is File => f !== null)
+      if (files.length > 0) {
         e.preventDefault()
-        onFile(file)
+        onFiles(files)
       }
     }
     window.addEventListener('paste', onPaste)
     return () => window.removeEventListener('paste', onPaste)
-  }, [onFile])
+  }, [onFiles])
 
   const openPicker = useCallback(() => inputRef.current?.click(), [])
 
@@ -78,6 +84,7 @@ export function Dropzone({ onFile, overlayLabel, children }: DropzoneProps) {
         ref={inputRef}
         type="file"
         accept="image/*"
+        multiple
         className="hidden"
         onChange={(e) => {
           take(e.target.files)
