@@ -12,10 +12,24 @@ const CYCLE_MS = 2600
 /** The demo is shown at full strength -- it is an advertisement for the look. */
 const DEMO_PARAMS = { ...DEFAULT_PARAMS, intensity: 1, grainAmount: 0.3 }
 
+/**
+ * Input-method facts, resolved once. A phone has no ⌘V to offer and no drag
+ * surface; a Windows machine pastes with Ctrl. Telling someone to press a key
+ * their device doesn't have is worse than saying nothing.
+ */
+const IS_TOUCH =
+  typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches === true
+const PASTE_KEY = /Mac|iPhone|iPad|iPod/.test(
+  typeof navigator === 'undefined' ? '' : navigator.userAgent,
+)
+  ? '⌘V'
+  : 'Ctrl+V'
+
 const STEPS = [
   {
     n: '01',
-    title: 'Drop a photo',
+    // "Drop" isn't an action a phone offers.
+    title: IS_TOUCH ? 'Pick a photo' : 'Drop a photo',
     body: 'Straight from your camera roll. Nothing uploads.',
   },
   {
@@ -156,15 +170,15 @@ export function Landing({ onBrowse }: LandingProps) {
   }, [choose])
 
   return (
-    <div className="flex flex-1 flex-col justify-center overflow-y-auto">
-      <div className="mx-auto w-full max-w-[78rem] px-4 py-4 lg:px-7 lg:py-6">
+    <div className="flex flex-1 flex-col overflow-y-auto">
+      <div className="m-auto w-full max-w-[78rem] px-4 py-4 lg:px-7 lg:py-6">
         <div className="grid gap-7 lg:grid-cols-[1fr_21rem] lg:gap-10">
           {/* ---------------- viewfinder ---------------- */}
           <button
             type="button"
             onClick={onBrowse}
             aria-label="Load a photo"
-            className="group relative block aspect-3/2 w-full cursor-pointer overflow-hidden border border-ink-700 bg-ink-900"
+            className="group relative mx-auto block aspect-3/2 max-h-[58vh] w-full cursor-pointer overflow-hidden border border-ink-700 bg-ink-900 lg:max-h-[64vh]"
           >
             <canvas
               ref={setCanvas}
@@ -248,10 +262,16 @@ export function Landing({ onBrowse }: LandingProps) {
               Load a photo
             </button>
             <p className="mt-2 text-center text-[11.5px] text-ink-400">
-              or drag one anywhere · or paste with{' '}
-              <kbd className="rounded border border-ink-700 bg-ink-850 px-1 py-px font-sans text-[10px] text-ink-200">
-                ⌘V
-              </kbd>
+              {IS_TOUCH ? (
+                'From your camera roll or straight off the camera'
+              ) : (
+                <>
+                  or drag one anywhere · or paste with{' '}
+                  <kbd className="rounded border border-ink-700 bg-ink-850 px-1 py-px font-sans text-[10px] text-ink-200">
+                    {PASTE_KEY}
+                  </kbd>
+                </>
+              )}
             </p>
 
             <p className="mt-6 border-b border-ink-800 pb-2.5 font-mono text-[9.5px] tracking-[0.18em] text-ink-400 uppercase">
@@ -308,6 +328,30 @@ export function Landing({ onBrowse }: LandingProps) {
             </div>
           </aside>
         </div>
+
+        {/* CC BY-SA 4.0 requires attribution and names the licence, so the credit
+            sits with the photo rather than buried in a repo file. */}
+        <p className="mt-2.5 text-[10.5px] leading-relaxed text-ink-400">
+          Sample frame:{' '}
+          <a
+            href="https://commons.wikimedia.org/wiki/File:Kiyomizu-dera,_Kyoto,_November_2016_-02.jpg"
+            target="_blank"
+            rel="noreferrer"
+            className="underline decoration-ink-600 underline-offset-2 transition-colors hover:text-ink-200"
+          >
+            Kiyomizu-dera, Kyoto
+          </a>{' '}
+          by Martin Falbisoner,{' '}
+          <a
+            href="https://creativecommons.org/licenses/by-sa/4.0/"
+            target="_blank"
+            rel="noreferrer"
+            className="underline decoration-ink-600 underline-offset-2 transition-colors hover:text-ink-200"
+          >
+            CC BY-SA 4.0
+          </a>
+          . Cropped and resized.
+        </p>
 
         {/* ---------------- how it works ---------------- */}
         <div className="mt-8 grid gap-x-6 gap-y-5 border-t border-ink-800 pt-6 pb-4 sm:grid-cols-2 lg:grid-cols-4">

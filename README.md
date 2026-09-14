@@ -92,8 +92,15 @@ against the GPU in the browser, since the grading only exists as a shader.
 
 ## Credits
 
-The sample frame on the landing page is a personal photograph, included with the owner's
-permission.
+The sample frame on the landing page is
+[Kiyomizu-dera, Kyoto, November 2016](https://commons.wikimedia.org/wiki/File:Kiyomizu-dera,_Kyoto,_November_2016_-02.jpg)
+by Martin Falbisoner, used under
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) and cropped to 3:2 and
+resized. The derivative in `src/assets/demo.jpg` carries the same licence.
+
+It earns its place beyond being pretty: a vermillion pagoda, autumn maples, deep green
+cedars, blue sky and a dark timber frame exercise every stage of the pipeline at once —
+hue-targeted saturation, the channel matrix, split toning and shadow tonality.
 
 ## Licence and trademarks
 

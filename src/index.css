@@ -102,6 +102,25 @@ input[type='range']:focus-visible::-webkit-slider-thumb {
   outline-offset: 2px;
 }
 
+/* A 20px-tall range input with a 13px thumb is fine under a mouse and awful
+   under a thumb. Grow the hit area (not the track) on touch devices. */
+@media (pointer: coarse) {
+  input[type='range'] {
+    height: 2.75rem;
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+    margin-top: -8px;
+  }
+
+  input[type='range']::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

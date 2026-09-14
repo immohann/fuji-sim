@@ -38,7 +38,7 @@ export function Controls({ sim, params, onChange, onReset }: ControlsProps) {
           type="button"
           onClick={() => setAdjustOpen((v) => !v)}
           aria-expanded={adjustOpen}
-          className="flex w-full items-center gap-1.5 text-[11px] font-medium tracking-wide text-ink-300 uppercase transition-colors hover:text-ink-100"
+          className="flex min-h-11 w-full cursor-pointer items-center gap-1.5 text-[11px] font-medium tracking-wide text-ink-300 uppercase transition-colors hover:text-ink-100 lg:min-h-0 lg:py-1"
         >
           <svg
             viewBox="0 0 24 24"
@@ -66,7 +66,7 @@ export function Controls({ sim, params, onChange, onReset }: ControlsProps) {
         <button
           type="button"
           onClick={onReset}
-          className="self-start text-[11px] text-ink-400 underline decoration-ink-600 underline-offset-3 transition-colors hover:text-ink-200"
+          className="min-h-9 cursor-pointer self-start text-[11px] text-ink-400 underline decoration-ink-600 underline-offset-3 transition-colors hover:text-ink-200"
         >
           Reset all
         </button>

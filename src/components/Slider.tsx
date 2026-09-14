@@ -28,7 +28,9 @@ export function Slider({ spec, value, defaultValue, onChange }: SliderProps) {
           onClick={() => onChange(defaultValue)}
           disabled={!modified}
           title={modified ? `Reset ${spec.label.toLowerCase()}` : undefined}
-          className="font-mono text-[11px] tabular-nums text-ink-200 transition-colors enabled:hover:text-accent disabled:cursor-default disabled:text-ink-400"
+          // Padding buys a 24px-plus hit area for a control that is only 11px of
+          // text, without changing where the number sits.
+          className="-my-1 -mr-1.5 cursor-pointer px-1.5 py-1 font-mono text-[11px] tabular-nums text-ink-200 transition-colors enabled:hover:text-accent disabled:cursor-default disabled:text-ink-400"
         >
           {spec.format(value)}
         </button>

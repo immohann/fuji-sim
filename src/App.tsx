@@ -204,7 +204,7 @@ export default function App() {
                     type="button"
                     onClick={() => setComparing((v) => !v)}
                     aria-pressed={comparing}
-                    className={`rounded px-2 py-1 font-medium tracking-wide uppercase transition-colors ${
+                    className={`flex min-h-11 cursor-pointer items-center rounded px-3 font-medium tracking-wide uppercase transition-colors lg:min-h-9 ${
                       comparing ? 'bg-ink-800 text-ink-100' : 'hover:text-ink-200'
                     }`}
                   >
@@ -230,7 +230,7 @@ export default function App() {
                     type="button"
                     onClick={handleDownload}
                     disabled={exporting || loading}
-                    className="w-full rounded-md bg-ink-100 px-4 py-2.5 text-[13px] font-semibold text-ink-950 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-ink-700 disabled:text-ink-400"
+                    className="min-h-11 w-full cursor-pointer rounded-md bg-ink-100 px-4 py-2.5 text-[13px] font-semibold text-ink-950 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-ink-700 disabled:text-ink-400"
                   >
                     {exporting ? 'Rendering…' : 'Download JPEG'}
                   </button>
@@ -259,7 +259,9 @@ function Shell({ children }: { children: React.ReactNode }) {
       {/* Styled as a camera's status LCD, which is the language the rest of the
           app speaks -- and it doubles as the privacy notice. */}
       <header className="flex shrink-0 items-center gap-5 border-b border-ink-800 px-4 py-2.5 font-mono text-[10px] tracking-[0.16em] uppercase lg:gap-7 lg:px-6">
-        <h1 className="font-semibold tracking-[0.22em] text-ink-100">Fuji&nbsp;Sim</h1>
+        {/* A wordmark, not the page heading -- the landing's hero headline is the
+            h1, so this stays a plain element to avoid two h1s on one page. */}
+        <div className="font-semibold tracking-[0.22em] text-ink-100">Fuji&nbsp;Sim</div>
         <span className="hidden text-ink-400 sm:inline">5 simulations</span>
         <span className="hidden text-ink-400 md:inline">Real-time GPU</span>
         <p className="ml-auto flex items-center gap-2 text-ink-300">
