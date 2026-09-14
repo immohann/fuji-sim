@@ -8,6 +8,17 @@ Everything runs on your own machine. The photo is decoded, graded and encoded in
 browser; it is never uploaded, and the page makes no network requests at all once it has
 loaded.
 
+## The landing
+
+The empty state is a camera viewfinder that is never actually empty: a sample frame cycles
+through all five simulations, with frame corners, rule-of-thirds guides and a status readout,
+and the film list drives it. You can play with the looks before committing a photo — the app
+demonstrates itself instead of showing you a box and waiting.
+
+The status bar doubles as the privacy notice. Typography is a system monospace stack rather
+than a web font, on purpose: a page that promises nothing leaves your device shouldn't open
+by calling a font CDN.
+
 ## Using it
 
 1. Drop a photo in — or click, or paste from the clipboard.
@@ -63,6 +74,8 @@ npm run dev
 
 ```bash
 npm test        # curve and simulation invariants
+npm run lint    # oxlint
+npm run format  # prettier
 npm run build   # typecheck + production bundle
 ```
 
@@ -76,6 +89,11 @@ against the GPU in the browser, since the grading only exists as a shader.
 - **HEIC** decodes in Safari but not Chrome or Firefox — iPhone photos may need exporting
   as JPEG first. The app detects this and says which.
 - Very large photos are downscaled to the GPU's maximum texture size before export.
+
+## Credits
+
+The sample frame on the landing page is a personal photograph, included with the owner's
+permission.
 
 ## Licence and trademarks
 

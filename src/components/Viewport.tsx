@@ -19,7 +19,14 @@ interface Box {
   height: number
 }
 
-export function Viewport({ image, sim, params, comparing, showOriginal, onError }: ViewportProps) {
+export function Viewport({
+  image,
+  sim,
+  params,
+  comparing,
+  showOriginal,
+  onError,
+}: ViewportProps) {
   const glCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const beforeHostRef = useRef<HTMLDivElement | null>(null)
   const areaRef = useRef<HTMLDivElement | null>(null)

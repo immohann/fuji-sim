@@ -45,7 +45,14 @@ export function Controls({ sim, params, onChange, onReset }: ControlsProps) {
             className={`h-3 w-3 transition-transform ${adjustOpen ? 'rotate-90' : ''}`}
             aria-hidden="true"
           >
-            <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M9 6l6 6-6 6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
           Adjust
         </button>

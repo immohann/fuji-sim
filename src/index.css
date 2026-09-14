@@ -16,8 +16,14 @@
 
   --color-accent: #5c9e7d;
   --color-accent-dim: #3d6b55;
+  /* Brighter than the accent: this is the colour of a camera's status LCD,
+     used for readouts rather than for surfaces. */
+  --color-lcd: #7fd48a;
 
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Deliberately a system stack, not a web font. A page that promises nothing
+     leaves your device shouldn't open by calling a font CDN. */
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 }
 
 /* The app is a dark room for looking at photographs; it does not follow the

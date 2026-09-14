@@ -60,9 +60,27 @@ export const SIMULATIONS: readonly FilmSim[] = [
     matrix: IDENTITY,
     // Barely an S-curve. Provia's job is to look like the scene.
     curves: {
-      r: [[0, 0], [0.25, 0.243], [0.5, 0.5], [0.75, 0.762], [1, 1]],
-      g: [[0, 0], [0.25, 0.243], [0.5, 0.5], [0.75, 0.762], [1, 1]],
-      b: [[0, 0], [0.25, 0.243], [0.5, 0.5], [0.75, 0.762], [1, 1]],
+      r: [
+        [0, 0],
+        [0.25, 0.243],
+        [0.5, 0.5],
+        [0.75, 0.762],
+        [1, 1],
+      ],
+      g: [
+        [0, 0],
+        [0.25, 0.243],
+        [0.5, 0.5],
+        [0.75, 0.762],
+        [1, 1],
+      ],
+      b: [
+        [0, 0],
+        [0.25, 0.243],
+        [0.5, 0.5],
+        [0.75, 0.762],
+        [1, 1],
+      ],
     },
     globalSat: 1.06,
     hueGains: [1, 1, 1, 1, 1, 1],
@@ -82,16 +100,30 @@ export const SIMULATIONS: readonly FilmSim[] = [
     // Negative off-diagonals pull each channel away from the others, which is
     // what makes slide film's colour separation feel "thick" rather than just
     // turned-up. Rows still sum to 1.
-    matrix: [
-      1.08, -0.05, -0.03,
-      -0.045, 1.075, -0.03,
-      -0.035, -0.055, 1.09,
-    ],
+    matrix: [1.08, -0.05, -0.03, -0.045, 1.075, -0.03, -0.035, -0.055, 1.09],
     // Hard S: crushed toe, bright shoulder. Blue toe sits lowest so skies go rich.
     curves: {
-      r: [[0, 0], [0.2, 0.152], [0.5, 0.512], [0.8, 0.868], [1, 1]],
-      g: [[0, 0], [0.2, 0.148], [0.5, 0.506], [0.8, 0.862], [1, 1]],
-      b: [[0, 0], [0.2, 0.142], [0.5, 0.5], [0.8, 0.856], [1, 1]],
+      r: [
+        [0, 0],
+        [0.2, 0.152],
+        [0.5, 0.512],
+        [0.8, 0.868],
+        [1, 1],
+      ],
+      g: [
+        [0, 0],
+        [0.2, 0.148],
+        [0.5, 0.506],
+        [0.8, 0.862],
+        [1, 1],
+      ],
+      b: [
+        [0, 0],
+        [0.2, 0.142],
+        [0.5, 0.5],
+        [0.8, 0.856],
+        [1, 1],
+      ],
     },
     globalSat: 1.17,
     hueGains: [1.06, 1.0, 1.045, 1.015, 1.075, 1.015],
@@ -110,17 +142,31 @@ export const SIMULATIONS: readonly FilmSim[] = [
     blurb: 'Muted and documentary. Holds midtone contrast, drains the colour.',
     // Rows pull slightly toward each other: the opposite of Velvia, and the
     // reason this reads as reportage rather than desaturated-Provia.
-    matrix: [
-      0.94, 0.04, 0.02,
-      0.04, 0.93, 0.03,
-      0.03, 0.05, 0.92,
-    ],
+    matrix: [0.94, 0.04, 0.02, 0.04, 0.93, 0.03, 0.03, 0.05, 0.92],
     // Lifted toe + clipped shoulder = the flat, printed look. Blue is lifted
     // most in shadow and pulled most in highlight: cool shadows, warm highlights.
     curves: {
-      r: [[0, 0.026], [0.25, 0.226], [0.5, 0.497], [0.75, 0.757], [1, 0.976]],
-      g: [[0, 0.028], [0.25, 0.224], [0.5, 0.49], [0.75, 0.75], [1, 0.968]],
-      b: [[0, 0.046], [0.25, 0.244], [0.5, 0.487], [0.75, 0.733], [1, 0.947]],
+      r: [
+        [0, 0.026],
+        [0.25, 0.226],
+        [0.5, 0.497],
+        [0.75, 0.757],
+        [1, 0.976],
+      ],
+      g: [
+        [0, 0.028],
+        [0.25, 0.224],
+        [0.5, 0.49],
+        [0.75, 0.75],
+        [1, 0.968],
+      ],
+      b: [
+        [0, 0.046],
+        [0.25, 0.244],
+        [0.5, 0.487],
+        [0.75, 0.733],
+        [1, 0.947],
+      ],
     },
     globalSat: 0.8,
     // Yellows and greens take the biggest hit -- that's the Kodachrome-ish
@@ -139,18 +185,32 @@ export const SIMULATIONS: readonly FilmSim[] = [
     id: 'classic-negative',
     name: 'Classic Negative',
     blurb: 'Faded Superia. Teal shadows, warm highlights, hard tonal separation.',
-    matrix: [
-      1.06, -0.02, -0.04,
-      -0.03, 1.04, -0.01,
-      -0.02, -0.06, 1.08,
-    ],
+    matrix: [1.06, -0.02, -0.04, -0.03, 1.04, -0.01, -0.02, -0.06, 1.08],
     // The whole look is in the blue channel's divergence: lifted well above red
     // and green in the toe (teal shadows), dragged well below them in the
     // shoulder (warm highlights). Red's high toe keeps the fade from going cold.
     curves: {
-      r: [[0, 0.055], [0.2, 0.186], [0.5, 0.522], [0.8, 0.852], [1, 0.985]],
-      g: [[0, 0.052], [0.2, 0.176], [0.5, 0.496], [0.8, 0.828], [1, 0.976]],
-      b: [[0, 0.086], [0.2, 0.216], [0.5, 0.47], [0.8, 0.788], [1, 0.955]],
+      r: [
+        [0, 0.055],
+        [0.2, 0.186],
+        [0.5, 0.522],
+        [0.8, 0.852],
+        [1, 0.985],
+      ],
+      g: [
+        [0, 0.052],
+        [0.2, 0.176],
+        [0.5, 0.496],
+        [0.8, 0.828],
+        [1, 0.976],
+      ],
+      b: [
+        [0, 0.086],
+        [0.2, 0.216],
+        [0.5, 0.47],
+        [0.8, 0.788],
+        [1, 0.955],
+      ],
     },
     globalSat: 0.93,
     // Greens pushed down and cyans up: grass goes olive, skies go teal.
@@ -172,9 +232,33 @@ export const SIMULATIONS: readonly FilmSim[] = [
     // Extra control points through the toe: the curve dives for a real black but
     // flattens just above it, so shadows stay readable instead of going to mud.
     curves: {
-      r: [[0, 0], [0.12, 0.072], [0.3, 0.252], [0.5, 0.5], [0.75, 0.796], [0.92, 0.942], [1, 1]],
-      g: [[0, 0], [0.12, 0.072], [0.3, 0.252], [0.5, 0.5], [0.75, 0.796], [0.92, 0.942], [1, 1]],
-      b: [[0, 0], [0.12, 0.072], [0.3, 0.252], [0.5, 0.5], [0.75, 0.796], [0.92, 0.942], [1, 1]],
+      r: [
+        [0, 0],
+        [0.12, 0.072],
+        [0.3, 0.252],
+        [0.5, 0.5],
+        [0.75, 0.796],
+        [0.92, 0.942],
+        [1, 1],
+      ],
+      g: [
+        [0, 0],
+        [0.12, 0.072],
+        [0.3, 0.252],
+        [0.5, 0.5],
+        [0.75, 0.796],
+        [0.92, 0.942],
+        [1, 1],
+      ],
+      b: [
+        [0, 0],
+        [0.12, 0.072],
+        [0.3, 0.252],
+        [0.5, 0.5],
+        [0.75, 0.796],
+        [0.92, 0.942],
+        [1, 1],
+      ],
     },
     globalSat: 0,
     hueGains: [1, 1, 1, 1, 1, 1],

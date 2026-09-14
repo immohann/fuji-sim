@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import { Controls } from './components/Controls'
 import { Dropzone } from './components/Dropzone'
 import { FilmStrip } from './components/FilmStrip'
+import { Landing } from './components/Landing'
 import { Viewport } from './components/Viewport'
 import { probeWebGL } from './gl/renderer'
 import { exportImage } from './image/exportImage'
@@ -14,9 +15,7 @@ import { DEFAULT_PARAMS, INITIAL_STATE } from './state/params'
 import { useThumbnails } from './state/useThumbnails'
 
 type Action =
-  | { type: 'sim'; id: SimId }
-  | { type: 'params'; patch: Partial<Params> }
-  | { type: 'reset' }
+  { type: 'sim'; id: SimId } | { type: 'params'; patch: Partial<Params> } | { type: 'reset' }
 
 function reducer(state: EditorState, action: Action): EditorState {
   switch (action.type) {
@@ -40,7 +39,18 @@ export default function App() {
 
   // Probed once: the loader needs the texture limit before the first decode.
   const support = useMemo(() => probeWebGL(), [])
-  const thumbnails = useThumbnails(image)
+  const thumbSource = useMemo(
+    () =>
+      image
+        ? {
+            bitmap: image.preview,
+            width: image.previewWidth,
+            height: image.previewHeight,
+          }
+        : null,
+    [image],
+  )
+  const thumbnails = useThumbnails(thumbSource)
   const sim = getSim(state.sim)
 
   // Free the previous bitmaps when a new photo replaces them, and on unmount.
@@ -135,8 +145,8 @@ export default function App() {
       <Shell>
         <div className="flex flex-1 items-center justify-center p-8 text-center">
           <p className="max-w-md text-sm leading-relaxed text-ink-300">
-            Fuji Sim needs WebGL2, which this browser doesn’t provide. Try a recent
-            version of Chrome, Safari, Firefox or Edge.
+            Fuji Sim needs WebGL2, which this browser doesn’t provide. Try a recent version of
+            Chrome, Safari, Firefox or Edge.
           </p>
         </div>
       </Shell>
@@ -162,71 +172,77 @@ export default function App() {
         </div>
       )}
 
-      {!image ? (
-        <Dropzone variant="empty" onFile={handleFile} />
-      ) : (
-        <main className="flex flex-1 flex-col lg:min-h-0 lg:flex-row">
-          <Dropzone variant="overlay" onFile={handleFile}>
-            <div className="flex flex-1 flex-col gap-3 p-3 lg:min-h-0 lg:p-5">
-              <Viewport
-                image={image}
-                sim={sim}
-                params={state.params}
-                comparing={comparing}
-                showOriginal={showOriginal}
-                onError={setError}
-              />
+      <Dropzone
+        onFile={handleFile}
+        overlayLabel={image ? 'Drop to replace the frame' : 'Drop to load the frame'}
+      >
+        {(openPicker) =>
+          !image ? (
+            <Landing onBrowse={openPicker} />
+          ) : (
+            <main className="flex flex-1 flex-col lg:min-h-0 lg:flex-row">
+              <div className="flex flex-1 flex-col gap-3 p-3 lg:min-h-0 lg:p-5">
+                <Viewport
+                  image={image}
+                  sim={sim}
+                  params={state.params}
+                  comparing={comparing}
+                  showOriginal={showOriginal}
+                  onError={setError}
+                />
 
-              {/* The contact sheet sits under the photo rather than in the rail:
+                {/* The contact sheet sits under the photo rather than in the rail:
                   five thumbnails need the width to be big enough to judge. */}
-              <FilmStrip
-                selected={state.sim}
-                thumbnails={thumbnails}
-                onSelect={(id) => dispatch({ type: 'sim', id })}
-              />
+                <FilmStrip
+                  selected={state.sim}
+                  thumbnails={thumbnails}
+                  onSelect={(id) => dispatch({ type: 'sim', id })}
+                />
 
-              <div className="flex shrink-0 items-center justify-center gap-3 text-[11px] text-ink-400">
-                <button
-                  type="button"
-                  onClick={() => setComparing((v) => !v)}
-                  aria-pressed={comparing}
-                  className={`rounded px-2 py-1 font-medium tracking-wide uppercase transition-colors ${
-                    comparing ? 'bg-ink-800 text-ink-100' : 'hover:text-ink-200'
-                  }`}
-                >
-                  Compare
-                </button>
-                <span className="hidden sm:inline">
-                  Hold <Key>B</Key> for the original · <Key>1</Key>–<Key>5</Key> to switch film
-                </span>
+                <div className="flex shrink-0 items-center justify-center gap-3 text-[11px] text-ink-400">
+                  <button
+                    type="button"
+                    onClick={() => setComparing((v) => !v)}
+                    aria-pressed={comparing}
+                    className={`rounded px-2 py-1 font-medium tracking-wide uppercase transition-colors ${
+                      comparing ? 'bg-ink-800 text-ink-100' : 'hover:text-ink-200'
+                    }`}
+                  >
+                    Compare
+                  </button>
+                  <span className="hidden sm:inline">
+                    Hold <Key>B</Key> for the original · <Key>1</Key>–<Key>5</Key> to switch
+                    film
+                  </span>
+                </div>
               </div>
-            </div>
-          </Dropzone>
 
-          <aside className="flex shrink-0 flex-col gap-5 border-t border-ink-800 bg-ink-900/50 p-4 lg:w-[18rem] lg:border-t-0 lg:border-l lg:p-5">
-            <Controls
-              sim={sim}
-              params={state.params}
-              onChange={(patch) => dispatch({ type: 'params', patch })}
-              onReset={() => dispatch({ type: 'reset' })}
-            />
+              <aside className="flex shrink-0 flex-col gap-5 border-t border-ink-800 bg-ink-900/50 p-4 lg:w-[18rem] lg:border-t-0 lg:border-l lg:p-5">
+                <Controls
+                  sim={sim}
+                  params={state.params}
+                  onChange={(patch) => dispatch({ type: 'params', patch })}
+                  onReset={() => dispatch({ type: 'reset' })}
+                />
 
-            <div className="mt-auto flex flex-col gap-2 border-t border-ink-800 pt-4">
-              <button
-                type="button"
-                onClick={handleDownload}
-                disabled={exporting || loading}
-                className="w-full rounded-md bg-ink-100 px-4 py-2.5 text-[13px] font-semibold text-ink-950 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-ink-700 disabled:text-ink-400"
-              >
-                {exporting ? 'Rendering…' : 'Download JPEG'}
-              </button>
-              <p className="text-center font-mono text-[10.5px] text-ink-400 tabular-nums">
-                {image.fullWidth} × {image.fullHeight}
-              </p>
-            </div>
-          </aside>
-        </main>
-      )}
+                <div className="mt-auto flex flex-col gap-2 border-t border-ink-800 pt-4">
+                  <button
+                    type="button"
+                    onClick={handleDownload}
+                    disabled={exporting || loading}
+                    className="w-full rounded-md bg-ink-100 px-4 py-2.5 text-[13px] font-semibold text-ink-950 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-ink-700 disabled:text-ink-400"
+                  >
+                    {exporting ? 'Rendering…' : 'Download JPEG'}
+                  </button>
+                  <p className="text-center font-mono text-[10.5px] text-ink-400 tabular-nums">
+                    {image.fullWidth} × {image.fullHeight}
+                  </p>
+                </div>
+              </aside>
+            </main>
+          )
+        }
+      </Dropzone>
 
       {loading && (
         <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-ink-950/60">
@@ -240,32 +256,23 @@ export default function App() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col lg:h-dvh">
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-ink-800 px-4 py-3 lg:px-5">
-        <h1 className="flex items-baseline gap-2">
-          <span className="text-[15px] font-semibold tracking-tight text-ink-100">Fuji Sim</span>
-          <span className="hidden text-[12px] text-ink-400 sm:inline">
-            film simulations, in your browser
-          </span>
-        </h1>
-        <p className="flex items-center gap-1.5 text-[11px] text-ink-400">
-          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
-            <path
-              d="M12 3l7 3v6c0 4.2-2.9 7.5-7 9-4.1-1.5-7-4.8-7-9V6l7-3Z"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Your photo never leaves this device
+      {/* Styled as a camera's status LCD, which is the language the rest of the
+          app speaks -- and it doubles as the privacy notice. */}
+      <header className="flex shrink-0 items-center gap-5 border-b border-ink-800 px-4 py-2.5 font-mono text-[10px] tracking-[0.16em] uppercase lg:gap-7 lg:px-6">
+        <h1 className="font-semibold tracking-[0.22em] text-ink-100">Fuji&nbsp;Sim</h1>
+        <span className="hidden text-ink-400 sm:inline">5 simulations</span>
+        <span className="hidden text-ink-400 md:inline">Real-time GPU</span>
+        <p className="ml-auto flex items-center gap-2 text-ink-300">
+          <span className="h-1.5 w-1.5 rounded-full bg-lcd" aria-hidden="true" />
+          Local — no upload
         </p>
       </header>
 
       {children}
 
       <footer className="shrink-0 border-t border-ink-800 px-4 py-2.5 text-[10.5px] leading-relaxed text-ink-400 lg:px-5">
-        An independent homage, not affiliated with or endorsed by Fujifilm. Film
-        simulation names are trademarks of FUJIFILM Corporation.
+        An independent homage, not affiliated with or endorsed by Fujifilm. Film simulation
+        names are trademarks of FUJIFILM Corporation.
       </footer>
     </div>
   )

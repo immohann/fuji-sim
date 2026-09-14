@@ -157,9 +157,7 @@ export class FilmRenderer {
     // of 256 visible steps in a gradient.
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-    gl.texImage2D(
-      gl.TEXTURE_2D, 0, gl.RGBA, LUT_SIZE, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, data,
-    )
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, LUT_SIZE, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, data)
 
     this.curveTextures.set(sim.id, texture)
     return texture
@@ -197,11 +195,11 @@ export class FilmRenderer {
     // GLSL mat3 is column-major; our matrices are written row-major for
     // readability, so transpose on the way in.
     const m = sim.matrix
-    gl.uniformMatrix3fv(this.loc('uMatrix'), false, new Float32Array([
-      m[0], m[3], m[6],
-      m[1], m[4], m[7],
-      m[2], m[5], m[8],
-    ]))
+    gl.uniformMatrix3fv(
+      this.loc('uMatrix'),
+      false,
+      new Float32Array([m[0], m[3], m[6], m[1], m[4], m[7], m[2], m[5], m[8]]),
+    )
 
     gl.uniform1fv(this.loc('uHueGains[0]'), new Float32Array(sim.hueGains))
     gl.uniform1f(this.loc('uGlobalSat'), sim.globalSat)
